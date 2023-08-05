@@ -21,7 +21,7 @@
             gap: 20px;
             padding: 20px;
         }
-        .resource, .worker, .upgrade, .structure {
+        .resource, .worker {
             margin: 10px;
             padding: 10px;
             border: 1px solid #ccc;
@@ -62,7 +62,7 @@
 </head>
 <body>
     <h1>Viking Clicker Game</h1>
-    <p>Welcome brave Viking, your journey begins here. Gather resources, hire workers, upgrade skills and build structures to aid your journey.</p>
+    <p>Welcome brave Viking, your journey begins here. Gather resources and hire workers to aid your journey.</p>
     <div id="container">
         <div id="resources">
             <h2>Resources</h2>
@@ -89,18 +89,6 @@
             </div>
             <div class="worker">
                 <button onclick="hire('miner')">Hire Miner (20 Wood, 20 Stone)</button>
-            </div>
-        </div>
-        <div id="upgrades">
-            <h2>Upgrades</h2>
-            <div class="upgrade">
-                <button onclick="buyUpgrade('vikingTraining')">Viking Training (20 Wood)</button>
-            </div>
-        </div>
-        <div id="structures">
-            <h2>Structures</h2>
-            <div class="structure">
-                <button onclick="build('goldMine')">Build Gold Mine (30 Stone, 10 Gold)</button>
             </div>
         </div>
     </div>
@@ -130,15 +118,6 @@
             stonemason: 1,
             miner: 1,
         };
-        const upgradeCosts = {
-            vikingTraining: 20,
-        };
-        const upgradeEffects = {
-            vikingTraining: () => { workerEfficiency.viking = 2; },
-        };
-        const structureCosts = {
-            goldMine: { stone: 30, gold: 10 },
-        };
         const savedGame = JSON.parse(localStorage.getItem('vikingClicker'));
         if (savedGame) {
             resources = savedGame.resources;
@@ -166,28 +145,7 @@
             }
             workers[worker]++;
         }
-        
-        function buyUpgrade(upgrade) {
-            if (resources.wood < upgradeCosts[upgrade]) {
-                return;
-            }
-            resources.wood -= upgradeCosts[upgrade];
-            document.getElementById('wood').textContent = resources.wood;
-            upgradeEffects[upgrade]();
-        }
-        
-        function build(structure) {
-            for (let resource in structureCosts[structure]) {
-                if (resources[resource] < structureCosts[structure][resource]) {
-                    return;
-                }
-            }
-            for (let resource in structureCosts[structure]) {
-                resources[resource] -= structureCosts[structure][resource];
-                document.getElementById(resource).textContent = resources[resource];
-            }
-        }
-        
+
         setInterval(function() {
             for (let worker in workers) {
                 const resource = workerResourceMap[worker];
@@ -198,7 +156,7 @@
 
         setInterval(function() {
             localStorage.setItem('vikingClicker', JSON.stringify({resources, workers, workerEfficiency}));
-        }, 60000);
+        }, 5000);
     </script>
 </body>
 </html>
