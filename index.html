@@ -63,8 +63,6 @@
 <body>
     <h1>Viking Clicker Game</h1>
     <p>Welcome brave Viking, your journey begins here. Gather resources, hire workers, upgrade skills and build structures to aid your journey.</p>
-    <button onclick="loadGame()">Load Game</button>
-    <button onclick="saveGame()">Save Game</button>
     <div id="container">
         <div id="resources">
             <h2>Resources</h2>
@@ -141,6 +139,15 @@
         const structureCosts = {
             goldMine: { stone: 30, gold: 10 },
         };
+        const savedGame = JSON.parse(localStorage.getItem('vikingClicker'));
+        if (savedGame) {
+            resources = savedGame.resources;
+            workers = savedGame.workers;
+            workerEfficiency = savedGame.workerEfficiency;
+            for (let resource in resources) {
+                document.getElementById(resource).textContent = resources[resource];
+            }
+        }
 
         function gather(resource) {
             resources[resource]++;
@@ -148,46 +155,37 @@
         }
         
         function hire(worker) {
-            // check if we can afford the worker
             for (let resource in workerCosts[worker]) {
                 if (resources[resource] < workerCosts[worker][resource]) {
                     return;
                 }
             }
-            // deduct the cost
             for (let resource in workerCosts[worker]) {
                 resources[resource] -= workerCosts[worker][resource];
                 document.getElementById(resource).textContent = resources[resource];
             }
-            // hire the worker
             workers[worker]++;
         }
         
         function buyUpgrade(upgrade) {
-            // check if we can afford the upgrade
             if (resources.wood < upgradeCosts[upgrade]) {
                 return;
             }
-            // deduct the cost
             resources.wood -= upgradeCosts[upgrade];
             document.getElementById('wood').textContent = resources.wood;
-            // apply the upgrade
             upgradeEffects[upgrade]();
         }
         
         function build(structure) {
-            // check if we can afford the structure
             for (let resource in structureCosts[structure]) {
                 if (resources[resource] < structureCosts[structure][resource]) {
                     return;
                 }
             }
-            // deduct the cost
             for (let resource in structureCosts[structure]) {
                 resources[resource] -= structureCosts[structure][resource];
                 document.getElementById(resource).textContent = resources[resource];
             }
-            // no effect for now, but you could add one
         }
         
         setInterval(function() {
@@ -197,22 +195,10 @@
                 document.getElementById(resource).textContent = resources[resource];
             }
         }, 1000);
-        
-        function saveGame() {
+
+        setInterval(function() {
             localStorage.setItem('vikingClicker', JSON.stringify({resources, workers, workerEfficiency}));
-        }
-        
-        function loadGame() {
-            const savedGame = JSON.parse(localStorage.getItem('vikingClicker'));
-            if (savedGame) {
-                resources = savedGame.resources;
-                workers = savedGame.workers;
-                workerEfficiency = savedGame.workerEfficiency;
-                for (let resource in resources) {
-                    document.getElementById(resource).textContent = resources[resource];
-                }
-            }
-        }
+        }, 60000);
     </script>
 </body>
 </html>
