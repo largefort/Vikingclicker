@@ -6,20 +6,18 @@
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
             color: #333;
+            padding: 5%;
         }
         h1, h2 {
             text-align: center;
-            font-size: 2em;
         }
         p {
-            font-size: 1.5em;
             text-align: center;
         }
         #container {
             display: flex;
             flex-direction: column;
             gap: 20px;
-            padding: 20px;
         }
         .resource, .worker {
             margin: 10px;
@@ -29,9 +27,9 @@
             text-align: center;
         }
         button {
-            padding: 20px 40px;
+            padding: 5% 10%;
             margin: 5px;
-            font-size: 1.5em;
+            font-size: 1em;
             color: #fff;
             background-color: #007BFF;
             border: none;
@@ -92,6 +90,8 @@
             </div>
         </div>
     </div>
+    <button onclick="saveGame()">Save Game</button>
+    <button onclick="loadGame()">Load Game</button>
     <script>
         let resources = {
             wood: 0,
@@ -118,15 +118,6 @@
             stonemason: 1,
             miner: 1,
         };
-        const savedGame = JSON.parse(localStorage.getItem('vikingClicker'));
-        if (savedGame) {
-            resources = savedGame.resources;
-            workers = savedGame.workers;
-            workerEfficiency = savedGame.workerEfficiency;
-            for (let resource in resources) {
-                document.getElementById(resource).textContent = resources[resource];
-            }
-        }
 
         function gather(resource) {
             resources[resource]++;
@@ -154,9 +145,21 @@
             }
         }, 1000);
 
-        setInterval(function() {
+        function saveGame() {
             localStorage.setItem('vikingClicker', JSON.stringify({resources, workers, workerEfficiency}));
-        }, 5000);
+        }
+
+        function loadGame() {
+            const savedGame = JSON.parse(localStorage.getItem('vikingClicker'));
+            if (savedGame) {
+                resources = savedGame.resources;
+                workers = savedGame.workers;
+                workerEfficiency = savedGame.workerEfficiency;
+                for (let resource in resources) {
+                    document.getElementById(resource).textContent = resources[resource];
+                }
+            }
+        }
     </script>
 </body>
 </html>
