@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        h1, h2 {
+            color: #666;
+            text-align: center;
+        }
+        p {
+            font-size: 18px;
+            text-align: center;
+        }
+        #container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            padding: 20px;
+        }
+        .resource, .worker, .upgrade, .structure {
+            margin: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            text-align: center;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 18px;
+            color: #fff;
+            background-color: #007BFF;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        @media screen and (min-width: 600px) {
+            #container {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        @media screen and (min-width: 900px) {
+            #container {
+                grid-template-columns: 1fr 1fr 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Viking Clicker Game</h1>
+    <p>Welcome brave Viking, your journey begins here. Gather resources, hire workers, upgrade skills and build structures to aid your journey.</p>
+    <button onclick="loadGame()">Load Game</button>
+    <button onclick="saveGame()">Save Game</button>
+    <div id="container">
+        <div id="resources">
+            <h2>Resources</h2>
+            <div class="resource">
+                <p>Wood: <span id="wood">0</span></p>
+                <button onclick="gather('wood')">Gather Wood</button>
+            </div>
+            <div class="resource">
+                <p>Stone: <span id="stone">0</span></p>
+                <button onclick="gather('stone')">Gather Stone</button>
+            </div>
+            <div class="resource">
+                <p>Gold: <span id="gold">0</span></p>
+                <button onclick="gather('gold')">Gather Gold</button>
+            </div>
+        </div>
+        <div id="workers">
+            <h2>Workers</h2>
+            <div class="worker">
+                <button onclick="hire('viking')">Hire Viking (10 Wood)</button>
+            </div>
+            <div class="worker">
+                <button onclick="hire('stonemason')">Hire Stonemason (10 Stone)</button>
+            </div>
+            <div class="worker">
+                <button onclick="hire('miner')">Hire Miner (20 Wood, 20 Stone)</button>
+            </div>
+        </div>
+        <div id="upgrades">
+            <h2>Upgrades</h2>
+            <div class="upgrade">
+                <button onclick="buyUpgrade('vikingTraining')">Viking Training (20 Wood)</button>
+            </div>
+        </div>
+        <div id="structures">
+            <h2>Structures</h2>
+            <div class="structure">
+                <button onclick="build('goldMine')">Build Gold Mine (30 Stone, 10 Gold)</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        let resources = {
+            wood: 0,
+            stone: 0,
+            gold: 0,
+        };
+        let workers = {
+            viking: 0,
+            stonemason: 0,
+            miner: 0,
+        };
+        const workerCosts = {
+            viking: { wood: 10 },
+            stonemason: { stone: 10 },
+            miner: { wood: 20, stone: 20 },
+        };
+        const workerResourceMap = {
+            viking: 'wood',
+            stonemason: 'stone',
+            miner: 'gold',
+        };
+        const workerEfficiency = {
+            viking: 1,
+            stonemason: 1,
+            miner: 1,
+        };
+        const upgradeCosts = {
+            vikingTraining: 20,
+        };
+        const structureCosts = {
+            goldMine: { stone: 30, gold: 10 },
+        };
+
+        function gather(resource) {
+            resources[resource]++;
+            document.getElementById(resource).textContent = resources[resource];
+        }
+
+        function hire(worker) {
+            const cost = workerCosts[worker];
+            let canAfford = true;
+            for (let resource in cost) {
+                if (resources[resource] < cost[resource]) {
+                    canAfford = false;
+                    break;
+                }
+            }
+            if (canAfford) {
+                for (let resource in cost) {
+                    resources[resource] -= cost[resource];
+                }
+                workers[worker]++;
+                for (let resource in cost) {
+                    document.getElementById(resource).textContent = resources[resource];
+                }
+            } else {
+                alert(`Not enough resources!`);
+            }
+        }
+
+        function buyUpgrade(upgrade) {
+            if (upgrade === 'vikingTraining') {
+                if (resources.wood >= upgradeCosts[upgrade]) {
+                    resources.wood -= upgradeCosts[upgrade];
+                    workerEfficiency.viking *= 2;
+                    document.getElementById('wood').textContent = resources.wood;
+                } else {
+                    alert("Not enough wood!");
+                }
+            }
+        }
+
+        function build(structure) {
+            const cost = structureCosts[structure];
+            let canAfford = true;
+            for (let resource in cost) {
+                if (resources[resource] < cost[resource]) {
+                    canAfford = false;
+                    break;
+                }
+            }
+            if (canAfford) {
+                for (let resource in cost) {
+                    resources[resource] -= cost[resource];
+                }
+                if (structure === 'goldMine') {
+                    workerEfficiency.miner *= 2;
+                }
+                for (let resource in cost) {
+                    document.getElementById(resource).textContent = resources[resource];
+                }
+            } else {
+                alert("Not enough resources!");
+            }
+        }
+
+        function saveGame() {
+            localStorage.setItem('resources', JSON.stringify(resources));
+            localStorage.setItem('workers', JSON.stringify(workers));
+        }
+
+        function loadGame() {
+            resources = JSON.parse(localStorage.getItem('resources'));
+            workers = JSON.parse(localStorage.getItem('workers'));
+            for (let resource in resources) {
+                document.getElementById(resource).textContent = resources[resource];
+            }
+        }
+
+        setInterval(function() {
+            for (let worker in workers) {
+                const resource = workerResourceMap[worker];
+                resources[resource] += workers[worker] * workerEfficiency[worker];
+                document.getElementById(resource).textContent = resources[resource];
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
