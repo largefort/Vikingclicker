@@ -8,16 +8,16 @@
             color: #333;
         }
         h1, h2 {
-            color: #666;
             text-align: center;
+            font-size: 2em;
         }
         p {
-            font-size: 18px;
+            font-size: 1.5em;
             text-align: center;
         }
         #container {
-            display: grid;
-            grid-template-columns: 1fr;
+            display: flex;
+            flex-direction: column;
             gap: 20px;
             padding: 20px;
         }
@@ -29,9 +29,9 @@
             text-align: center;
         }
         button {
-            padding: 10px 20px;
+            padding: 20px 40px;
             margin: 5px;
-            font-size: 18px;
+            font-size: 1.5em;
             color: #fff;
             background-color: #007BFF;
             border: none;
@@ -44,12 +44,18 @@
         }
         @media screen and (min-width: 600px) {
             #container {
-                grid-template-columns: 1fr 1fr;
+                flex-direction: row;
+                flex-wrap: wrap;
             }
-        }
-        @media screen and (min-width: 900px) {
-            #container {
-                grid-template-columns: 1fr 1fr 1fr 1fr;
+            h1, h2 {
+                font-size: 1.5em;
+            }
+            p {
+                font-size: 1em;
+            }
+            button {
+                padding: 10px 20px;
+                font-size: 1em;
             }
         }
     </style>
@@ -129,6 +135,9 @@
         const upgradeCosts = {
             vikingTraining: 20,
         };
+        const upgradeEffects = {
+            vikingTraining: () => { workerEfficiency.viking = 2; },
+        };
         const structureCosts = {
             goldMine: { stone: 30, gold: 10 },
         };
@@ -137,78 +146,50 @@
             resources[resource]++;
             document.getElementById(resource).textContent = resources[resource];
         }
-
+        
         function hire(worker) {
-            const cost = workerCosts[worker];
-            let canAfford = true;
-            for (let resource in cost) {
-                if (resources[resource] < cost[resource]) {
-                    canAfford = false;
-                    break;
+            // check if we can afford the worker
+            for (let resource in workerCosts[worker]) {
+                if (resources[resource] < workerCosts[worker][resource]) {
+                    return;
                 }
             }
-            if (canAfford) {
-                for (let resource in cost) {
-                    resources[resource] -= cost[resource];
-                }
-                workers[worker]++;
-                for (let resource in cost) {
-                    document.getElementById(resource).textContent = resources[resource];
-                }
-            } else {
-                alert(`Not enough resources!`);
-            }
-        }
-
-        function buyUpgrade(upgrade) {
-            if (upgrade === 'vikingTraining') {
-                if (resources.wood >= upgradeCosts[upgrade]) {
-                    resources.wood -= upgradeCosts[upgrade];
-                    workerEfficiency.viking *= 2;
-                    document.getElementById('wood').textContent = resources.wood;
-                } else {
-                    alert("Not enough wood!");
-                }
-            }
-        }
-
-        function build(structure) {
-            const cost = structureCosts[structure];
-            let canAfford = true;
-            for (let resource in cost) {
-                if (resources[resource] < cost[resource]) {
-                    canAfford = false;
-                    break;
-                }
-            }
-            if (canAfford) {
-                for (let resource in cost) {
-                    resources[resource] -= cost[resource];
-                }
-                if (structure === 'goldMine') {
-                    workerEfficiency.miner *= 2;
-                }
-                for (let resource in cost) {
-                    document.getElementById(resource).textContent = resources[resource];
-                }
-            } else {
-                alert("Not enough resources!");
-            }
-        }
-
-        function saveGame() {
-            localStorage.setItem('resources', JSON.stringify(resources));
-            localStorage.setItem('workers', JSON.stringify(workers));
-        }
-
-        function loadGame() {
-            resources = JSON.parse(localStorage.getItem('resources'));
-            workers = JSON.parse(localStorage.getItem('workers'));
-            for (let resource in resources) {
+            // deduct the cost
+            for (let resource in workerCosts[worker]) {
+                resources[resource] -= workerCosts[worker][resource];
                 document.getElementById(resource).textContent = resources[resource];
             }
+            // hire the worker
+            workers[worker]++;
         }
-
+        
+        function buyUpgrade(upgrade) {
+            // check if we can afford the upgrade
+            if (resources.wood < upgradeCosts[upgrade]) {
+                return;
+            }
+            // deduct the cost
+            resources.wood -= upgradeCosts[upgrade];
+            document.getElementById('wood').textContent = resources.wood;
+            // apply the upgrade
+            upgradeEffects[upgrade]();
+        }
+        
+        function build(structure) {
+            // check if we can afford the structure
+            for (let resource in structureCosts[structure]) {
+                if (resources[resource] < structureCosts[structure][resource]) {
+                    return;
+                }
+            }
+            // deduct the cost
+            for (let resource in structureCosts[structure]) {
+                resources[resource] -= structureCosts[structure][resource];
+                document.getElementById(resource).textContent = resources[resource];
+            }
+            // no effect for now, but you could add one
+        }
+        
         setInterval(function() {
             for (let worker in workers) {
                 const resource = workerResourceMap[worker];
@@ -216,6 +197,22 @@
                 document.getElementById(resource).textContent = resources[resource];
             }
         }, 1000);
+        
+        function saveGame() {
+            localStorage.setItem('vikingClicker', JSON.stringify({resources, workers, workerEfficiency}));
+        }
+        
+        function loadGame() {
+            const savedGame = JSON.parse(localStorage.getItem('vikingClicker'));
+            if (savedGame) {
+                resources = savedGame.resources;
+                workers = savedGame.workers;
+                workerEfficiency = savedGame.workerEfficiency;
+                for (let resource in resources) {
+                    document.getElementById(resource).textContent = resources[resource];
+                }
+            }
+        }
     </script>
 </body>
 </html>
