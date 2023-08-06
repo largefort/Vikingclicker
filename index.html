@@ -26,10 +26,7 @@
         }
 
         button {
-            display: block;
-            width: 100%;
-            padding: 1em;
-            margin: 1em 0;
+            padding: 0.5em 1em;
             font-size: 1em;
             color: #fff;
             background-color: #007BFF;
@@ -118,9 +115,18 @@
             miner: { wood: 20, stone: 20 }
         };
 
+        function formatNumber(num) {
+            if (num < 1e3) return num; 
+            if (num >= 1e3 && num < 1e6) return +(num / 1e3).toFixed(1) + "K";
+            if (num >= 1e6 && num < 1e9) return +(num / 1e6).toFixed(1) + "M";
+            if (num >= 1e9 && num < 1e12) return +(num / 1e9).toFixed(1) + "B";
+            if (num >= 1e12) return +(num / 1e12).toFixed(1) + "T"; 
+            return num;
+        }
+
         function gather(resource) {
             resources[resource]++;
-            document.getElementById(resource).textContent = resources[resource];
+            document.getElementById(resource).textContent = formatNumber(resources[resource]);
         }
 
         function hire(worker) {
@@ -129,7 +135,7 @@
             if (canAfford) {
                 Object.keys(workerCosts[worker]).forEach(res => {
                     resources[res] -= workerCosts[worker][res];
-                    document.getElementById(res).textContent = resources[res];
+                    document.getElementById(res).textContent = formatNumber(resources[res]);
                 });
 
                 workers[worker]++;
@@ -143,7 +149,7 @@
             resources['gold'] += workers['miner'];
             
             Object.keys(resources).forEach(resource => {
-                document.getElementById(resource).textContent = resources[resource];
+                document.getElementById(resource).textContent = formatNumber(resources[resource]);
             });
 
             localStorage.setItem('vikingClicker', JSON.stringify({ resources, workers }));
@@ -157,9 +163,9 @@
             Object.assign(workers, parsedData.workers);
             
             Object.keys(resources).forEach(resource => {
-                document.getElementById(resource).textContent = resources[resource];
+                document.getElementById(resource).textContent = formatNumber(resources[resource]);
             });
-
+            
             Object.keys(workers).forEach(worker => {
                 document.getElementById(worker + "Count").textContent = workers[worker];
             });
