@@ -1,38 +1,30 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         @font-face {
             font-family: 'Norse';
             src: url('Norse.otf');
         }
+
         body {
             font-family: 'Norse', serif;
             background-color: #f4f4f4;
             color: #333;
             padding: 5%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
+
         h1, h2 {
             text-align: center;
             margin-bottom: 1em;
         }
-        p {
-            text-align: center;
-            margin-bottom: 1em;
-        }
-        #container {
-            display: flex;
-            flex-direction: column;
-            gap: 2em;
-        }
-        .resource, .worker {
-            margin: 1em;
-            padding: 1em;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            text-align: center;
-        }
+
         button {
             display: block;
             width: 100%;
@@ -46,149 +38,131 @@
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
+
         button:hover {
             background-color: #0056b3;
         }
 
-        @media screen and (max-width: 360px) {
-            body {
-                padding: 2%;
-            }
-            h1, h2 {
-                font-size: 1.2em;
-            }
-            p {
-                font-size: 0.8em;
-            }
-            button {
-                font-size: 0.8em;
-                padding: 0.8em;
-            }
+        #resources, #menu {
+            display: flex;
+            flex-direction: column;
+            gap: 1em;
+            width: 90%;
+            max-width: 400px;
         }
 
-        #menu {
-            display: none;
-            flex-direction: column;
-            gap: 2em;
+        .resource, .worker {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1em;
             border: 1px solid #ccc;
             border-radius: 5px;
-            padding: 1em;
             background-color: #fff;
-        }
-
-        #menuToggle {
-            display: block;
-            margin: 1em auto;
-            background-color: #333;
-            color: #fff;
         }
     </style>
 </head>
 
 <body>
     <h1>Viking Clicker Game</h1>
-    <p>Welcome brave Viking, your journey begins here. Gather resources and hire workers to aid your journey.</p>
+    <p>Gather resources and hire workers to aid your journey.</p>
 
-    <button id="menuToggle" onclick="toggleMenu()">Menu</button>
-    <div id="menu">
-        <h2>Workers</h2>
-        <div class="worker">
-            <button onclick="hire('viking')">Hire Viking (10 Wood)</button>
+    <div id="resources">
+        <h2>Resources</h2>
+        <div class="resource">
+            Wood: <span id="wood">0</span>
+            <button onclick="gather('wood')">Gather</button>
         </div>
-        <div class="worker">
-            <button onclick="hire('stonemason')">Hire Stonemason (10 Stone)</button>
+        <div class="resource">
+            Stone: <span id="stone">0</span>
+            <button onclick="gather('stone')">Gather</button>
         </div>
-        <div class="worker">
-            <button onclick="hire('miner')">Hire Miner (20 Wood, 20 Stone)</button>
+        <div class="resource">
+            Gold: <span id="gold">0</span>
+            <button onclick="gather('gold')">Gather</button>
         </div>
     </div>
 
-    <div id="container">
-        <div id="resources">
-            <h2>Resources</h2>
-            <div class="resource">
-                <p>Wood: <span id="wood">0</span></p>
-                <button onclick="gather('wood')">Gather Wood</button>
-            </div>
-            <div class="resource">
-                <p>Stone: <span id="stone">0</span></p>
-                <button onclick="gather('stone')">Gather Stone</button>
-            </div>
-            <div class="resource">
-                <p>Gold: <span id="gold">0</span></p>
-                <button onclick="gather('gold')">Gather Gold</button>
-            </div>
+    <div id="menu">
+        <h2>Workers</h2>
+        <div class="worker">
+            Viking: <span id="vikingCount">0</span>
+            <button onclick="hire('viking')">Hire (10 Wood)</button>
+        </div>
+        <div class="worker">
+            Stonemason: <span id="stonemasonCount">0</span>
+            <button onclick="hire('stonemason')">Hire (10 Stone)</button>
+        </div>
+        <div class="worker">
+            Miner: <span id="minerCount">0</span>
+            <button onclick="hire('miner')">Hire (20 Wood, 20 Stone)</button>
         </div>
     </div>
 
     <script>
-        let resources = {
+        const resources = {
             wood: 0,
             stone: 0,
-            gold: 0,
+            gold: 0
         };
-        let workers = {
+
+        const workers = {
             viking: 0,
             stonemason: 0,
-            miner: 0,
+            miner: 0
         };
+
         const workerCosts = {
             viking: { wood: 10 },
             stonemason: { stone: 10 },
-            miner: { wood: 20, stone: 20 },
+            miner: { wood: 20, stone: 20 }
         };
 
         function gather(resource) {
             resources[resource]++;
             document.getElementById(resource).textContent = resources[resource];
         }
-        
+
         function hire(worker) {
-            for (let resource in workerCosts[worker]) {
-                if (resources[resource] < workerCosts[worker][resource]) {
-                    return;
-                }
+            const canAfford = Object.keys(workerCosts[worker]).every(res => resources[res] >= workerCosts[worker][res]);
+
+            if (canAfford) {
+                Object.keys(workerCosts[worker]).forEach(res => {
+                    resources[res] -= workerCosts[worker][res];
+                    document.getElementById(res).textContent = resources[res];
+                });
+
+                workers[worker]++;
+                document.getElementById(worker + "Count").textContent = workers[worker];
             }
-            for (let resource in workerCosts[worker]) {
-                resources[resource] -= workerCosts[worker][resource];
+        }
+
+        setInterval(() => {
+            resources['wood'] += workers['viking'];
+            resources['stone'] += workers['stonemason'];
+            resources['gold'] += workers['miner'];
+            
+            Object.keys(resources).forEach(resource => {
                 document.getElementById(resource).textContent = resources[resource];
-            }
-            workers[worker]++;
-        }
+            });
 
-        function toggleMenu() {
-            const menu = document.getElementById('menu');
-            if (menu.style.display === 'none' || menu.style.display === '') {
-                menu.style.display = 'block';
-            } else {
-                menu.style.display = 'none';
-            }
-        }
-
-        setInterval(function() {
-            for (let worker in workers) {
-                resources['wood'] += workers['viking'];
-                resources['stone'] += workers['stonemason'];
-                resources['gold'] += workers['miner'];
-                document.getElementById('wood').textContent = resources['wood'];
-                document.getElementById('stone').textContent = resources['stone'];
-                document.getElementById('gold').textContent = resources['gold'];
-            }
+            localStorage.setItem('vikingClicker', JSON.stringify({ resources, workers }));
         }, 1000);
 
-        setInterval(function() {
-            localStorage.setItem('vikingClicker', JSON.stringify({resources, workers}));
-        }, 5000);
+        const savedData = localStorage.getItem('vikingClicker');
 
-        window.onload = function() {
-            const savedGame = JSON.parse(localStorage.getItem('vikingClicker'));
-            if (savedGame) {
-                resources = savedGame.resources;
-                workers = savedGame.workers;
-                for (let resource in resources) {
-                    document.getElementById(resource).textContent = resources[resource];
-                }
-            }
+        if (savedData) {
+            const parsedData = JSON.parse(savedData);
+            Object.assign(resources, parsedData.resources);
+            Object.assign(workers, parsedData.workers);
+            
+            Object.keys(resources).forEach(resource => {
+                document.getElementById(resource).textContent = resources[resource];
+            });
+
+            Object.keys(workers).forEach(worker => {
+                document.getElementById(worker + "Count").textContent = workers[worker];
+            });
         }
     </script>
 </body>
