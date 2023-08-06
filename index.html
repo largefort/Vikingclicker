@@ -12,12 +12,26 @@
 
         body {
             font-family: 'Norse', serif;
-            background-color: #f4f4f4;
+            background: linear-gradient(-45deg, #2ee02b, #2b5ee0);
+            background-size: 200% 200%;
             color: #333;
             padding: 5%;
             display: flex;
             flex-direction: column;
             align-items: center;
+            animation: gradient 10s ease infinite;
+        }
+
+        @keyframes gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
         }
 
         h1, h2 {
