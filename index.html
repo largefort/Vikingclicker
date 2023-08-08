@@ -1,162 +1,222 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Viking Clicker</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
+        @font-face {
+            font-family: 'Norse';
+            src: url('Norse.otf');
+        }
+
         body {
-            font-family: 'Fenrir Gothic', sans-serif;
-            background: linear-gradient(180deg, blue, green);
-            color: white;
+            font-family: 'Norse', serif;
+            background: linear-gradient(-45deg, #2ee02b, #2b5ee0);
+            background-size: 200% 200%;
+            color: #333;
+            padding: 5%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: gradient 10s ease infinite;
+        }
+
+        @keyframes gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        h1, h2 {
+            text-align: center;
+            margin-bottom: 1em;
+        }
+
+        button {
+            padding: 0.5em 1em;
+            font-size: 1em;
+            color: #fff;
+            background-color: #007BFF;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #resources, #menu {
+            display: flex;
+            flex-direction: column;
+            gap: 1em;
+            width: 90%;
+            max-width: 400px;
         }
 
         .resource, .worker {
-            margin: 10px;
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1em;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff;
         }
 
-        .click-effect {
+        .floating-text {
             position: absolute;
-            font-size: 24px;
-            transition: transform 1s, opacity 1s;
+            color: red;
+            font-weight: bold;
+            animation: floatText 2s linear;
         }
 
-        @media screen and (max-width: 360px) {
-            /* CSS rules for small screens (<= 360px) */
+        @keyframes floatText {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
         }
     </style>
 </head>
 
 <body>
-    <div class="resource" id="wood">Wood: 0</div>
-    <div class="resource" id="stone">Stone: 0</div>
-    <div class="resource" id="gold">Gold: 0</div>
+    <h1>Viking Clicker Game</h1>
+    <p>Gather resources and hire workers to aid your journey.</p>
 
-    <button onclick="gather('wood')">Gather Wood</button>
-    <button onclick="gather('stone')">Gather Stone</button>
-    <button onclick="gather('gold')">Gather Gold</button>
-
-    <div class="worker">
-        <div id="vikingCount">0</div>
-        <button onclick="hire('viking')">Hire Viking</button>
+    <div id="resources">
+        <h2>Resources</h2>
+        <div class="resource">
+            Wood: <span id="wood">0</span>
+            <button onclick="gather('wood')">Gather</button>
+        </div>
+        <div class="resource">
+            Stone: <span id="stone">0</span>
+            <button onclick="gather('stone')">Gather</button>
+        </div>
+        <div class="resource">
+            Gold: <span id="gold">0</span>
+            <button onclick="gather('gold')">Gather</button>
+        </div>
     </div>
 
-    <div class="worker">
-        <div id="stonemasonCount">0</div>
-        <button onclick="hire('stonemason')">Hire Stonemason</button>
+    <div id="menu">
+        <h2>Workers</h2>
+        <div class="worker">
+            Viking: <span id="vikingCount">0</span>
+            <button onclick="hire('viking')">Hire (10 Wood)</button>
+        </div>
+        <div class="worker">
+            Stonemason: <span id="stonemasonCount">0</span>
+            <button onclick="hire('stonemason')">Hire (10 Stone)</button>
+        </div>
+        <div class="worker">
+            Miner: <span id="minerCount">0</span>
+            <button onclick="hire('miner')">Hire (20 Wood, 20 Stone)</button>
+        </div>
     </div>
-
-    <div class="worker">
-        <div id="minerCount">0</div>
-        <button onclick="hire('miner')">Hire Miner</button>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/gh/fabiospampinato/tinydate@2.0.0/dist/tinydate.umd.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/numeral.js/2.0.6/numeral.min.js"></script>
 
     <script>
-        var resources = {
+        const resources = {
             wood: 0,
             stone: 0,
             gold: 0
         };
 
-        var workers = {
+        const workers = {
             viking: 0,
             stonemason: 0,
             miner: 0
         };
 
-        var workerYields = {
-            viking: { wood: 1 },
-            stonemason: { stone: 1 },
-            miner: { gold: 1 }
+        const workerCosts = {
+            viking: { wood: 10 },
+            stonemason: { stone: 10 },
+            miner: { wood: 20, stone: 20 }
         };
 
-        function gather(type) {
-            resources[type] += 1;
-            document.getElementById(type).textContent = type.charAt(0).toUpperCase() + type.slice(1) + ': ' + numeral(resources[type]).format('0a');
-
-            var effect = document.createElement('div');
-            effect.textContent = '+1';
-            effect.className = 'click-effect';
-            effect.style.left = event.clientX + 'px';
-            effect.style.top = event.clientY + 'px';
-            document.body.appendChild(effect);
-
-            setTimeout(() => {
-                effect.style.transform = 'translateY(-20px)';
-                effect.style.opacity = '0';
-            }, 50);
-            setTimeout(() => {
-                document.body.removeChild(effect);
-            }, 1050);
-
-            saveGame();
+        function formatNumber(num) {
+            if (num < 1e3) return num; 
+            if (num >= 1e3 && num < 1e6) return +(num / 1e3).toFixed(1) + "K";
+            if (num >= 1e6 && num < 1e9) return +(num / 1e6).toFixed(1) + "M";
+            if (num >= 1e9 && num < 1e12) return +(num / 1e9).toFixed(1) + "B";
+            if (num >= 1e12) return +(num / 1e12).toFixed(1) + "T"; 
+            return num;
         }
 
-        function hire(type) {
-            if (resources[type] >= (workers[type] + 1) * 10) {
-                resources[type] -= (workers[type] + 1) * 10;
-                workers[type] += 1;
+        function gather(resource) {
+            resources[resource]++;
+            document.getElementById(resource).textContent = formatNumber(resources[resource]);
+            createFloatingText(resource, "+1");
+        }
 
-                document.getElementById(type).textContent = type.charAt(0).toUpperCase() + type.slice(1) + ': ' + numeral(resources[type]).format('0a');
-                document.getElementById(type + 'Count').textContent = workers[type];
+        function hire(worker) {
+            const canAfford = Object.keys(workerCosts[worker]).every(res => resources[res] >= workerCosts[worker][res]);
 
-                setInterval(() => {
-                    const yields = workerYields[type];
-                    Object.keys(yields).forEach(resource => {
-                        resources[resource] += yields[resource] * workers[type];
-                        document.getElementById(resource).textContent = resource.charAt(0).toUpperCase() + resource.slice(1) + ': ' + numeral(resources[resource]).format('0a');
-                    });
-                    saveGame();
-                }, 1000);
+            if (canAfford) {
+                Object.keys(workerCosts[worker]).forEach(res => {
+                    resources[res] -= workerCosts[worker][res];
+                    document.getElementById(res).textContent = formatNumber(resources[res]);
+                });
+
+                workers[worker]++;
+                document.getElementById(worker + "Count").textContent = workers[worker];
             }
         }
 
-        function saveGame() {
-            var gameData = {
-                resources: {
-                    wood: resources.wood,
-                    stone: resources.stone,
-                    gold: resources.gold
-                },
-                workers: {
-                    viking: workers.viking,
-                    stonemason: workers.stonemason,
-                    miner: workers.miner
-                }
-            };
-            localStorage.setItem('gameData', JSON.stringify(gameData));
+        function createFloatingText(resource, text) {
+            const parent = document.querySelector(`#${resource}`).parentElement;
+            const floatingText = document.createElement('span');
+            floatingText.textContent = text;
+            floatingText.className = 'floating-text';
+            parent.appendChild(floatingText);
+
+            setTimeout(() => {
+                parent.removeChild(floatingText);
+            }, 2000);
         }
 
-        if (localStorage.getItem('gameData')) {
-            var gameData = JSON.parse(localStorage.getItem('gameData'));
-            resources.wood = gameData.resources.wood;
-            resources.stone = gameData.resources.stone;
-            resources.gold = gameData.resources.gold;
-            workers.viking = gameData.workers.viking;
-            workers.stonemason = gameData.workers.stonemason;
-            workers.miner = gameData.workers.miner;
+        setInterval(() => {
+            resources['wood'] += workers['viking'];
+            resources['stone'] += workers['stonemason'];
+            resources['gold'] += workers['miner'];
+            
+            Object.keys(resources).forEach(resource => {
+                document.getElementById(resource).textContent = formatNumber(resources[resource]);
+            });
 
-            document.getElementById('wood').textContent = 'Wood: ' + numeral(resources.wood).format('0a');
-            document.getElementById('stone').textContent = 'Stone: ' + numeral(resources.stone).format('0a');
-            document.getElementById('gold').textContent = 'Gold: ' + numeral(resources.gold).format('0a');
-            document.getElementById('vikingCount').textContent = workers.viking;
-            document.getElementById('stonemasonCount').textContent = workers.stonemason;
-            document.getElementById('minerCount').textContent = workers.miner;
+            localStorage.setItem('vikingClicker', JSON.stringify({ resources, workers }));
+        }, 1000);
 
-            Object.keys(workers).forEach(type => {
-                setInterval(() => {
-                    const yields = workerYields[type];
-                    Object.keys(yields).forEach(resource => {
-                        resources[resource] += yields[resource] * workers[type];
-                        document.getElementById(resource).textContent = resource.charAt(0).toUpperCase() + resource.slice(1) + ': ' + numeral(resources[resource]).format('0a');
-                    });
-                    saveGame();
-                }, 1000);
+        const savedData = localStorage.getItem('vikingClicker');
+
+        if (savedData) {
+            const parsedData = JSON.parse(savedData);
+            Object.assign(resources, parsedData.resources);
+            Object.assign(workers, parsedData.workers);
+            
+            Object.keys(resources).forEach(resource => {
+                document.getElementById(resource).textContent = formatNumber(resources[resource]);
+            });
+            
+            Object.keys(workers).forEach(worker => {
+                document.getElementById(worker + "Count").textContent = workers[worker];
             });
         }
     </script>
 </body>
-</html>
 
+</html>
