@@ -151,6 +151,7 @@
         function gather(resource) {
             resources[resource]++;
             document.getElementById(resource).textContent = formatNumber(resources[resource]);
+            saveGame();
         }
 
         function hire(worker) {
@@ -162,8 +163,36 @@
                     document.getElementById(resource).textContent = formatNumber(resources[resource]);
                 });
                 document.getElementById(worker + "Count").textContent = workers[worker];
+                saveGame();
             }
         }
+
+        function saveGame() {
+            const gameData = {
+                resources: {
+                    wood: resources.wood,
+                    stone: resources.stone,
+                    gold: resources.gold
+                },
+                workers: {
+                    viking: workers.viking,
+                    stonemason: workers.stonemason,
+                    miner: workers.miner
+                }
+            };
+            localStorage.setItem('gameData', JSON.stringify(gameData));
+        }
+
+        if (localStorage.getItem('gameData')) {
+            const gameData = JSON.parse(localStorage.getItem('gameData'));
+            resources.wood = gameData.resources.wood;
+            resources.stone = gameData.resources.stone;
+            resources.gold = gameData.resources.gold;
+            workers.viking = gameData.workers.viking;
+            workers.stonemason = gameData.workers.stonemason;
+            workers.miner = gameData.workers.miner;
+        }
+
     </script>
 </body>
 
