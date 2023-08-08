@@ -75,6 +75,12 @@
         .resource > span, .worker > span {
             margin-left: 10px;
         }
+
+        .worker button {
+            max-width: 60%; 
+            white-space: normal; 
+        }
+
     </style>
 </head>
 
@@ -110,7 +116,7 @@
         </div>
         <div class="worker">
             <span>Miner: <span id="minerCount">0</span></span>
-            <button onclick="hire('miner')">Hire gold miner</button>
+            <button onclick="hire('miner')">Hire (20 Wood, 20 Stone)</button>
         </div>
     </div>
 
@@ -162,3 +168,4 @@
 </body>
 
 </html>
+
