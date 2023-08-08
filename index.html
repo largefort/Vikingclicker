@@ -71,6 +71,10 @@
             border-radius: 5px;
             background-color: #fff;
         }
+
+        .resource > span, .worker > span {
+            margin-left: 10px;
+        }
     </style>
 </head>
 
@@ -81,15 +85,15 @@
     <div id="resources">
         <h2>Resources</h2>
         <div class="resource">
-            Wood: <span id="wood">0</span>
+            <span>Wood: <span id="wood">0</span></span>
             <button onclick="gather('wood')">Gather</button>
         </div>
         <div class="resource">
-            Stone: <span id="stone">0</span>
+            <span>Stone: <span id="stone">0</span></span>
             <button onclick="gather('stone')">Gather</button>
         </div>
         <div class="resource">
-            Gold: <span id="gold">0</span>
+            <span>Gold: <span id="gold">0</span></span>
             <button onclick="gather('gold')">Gather</button>
         </div>
     </div>
@@ -97,15 +101,15 @@
     <div id="menu">
         <h2>Workers</h2>
         <div class="worker">
-            Viking: <span id="vikingCount">0</span>
+            <span>Viking: <span id="vikingCount">0</span></span>
             <button onclick="hire('viking')">Hire (10 Wood)</button>
         </div>
         <div class="worker">
-            Stonemason: <span id="stonemasonCount">0</span>
+            <span>Stonemason: <span id="stonemasonCount">0</span></span>
             <button onclick="hire('stonemason')">Hire (10 Stone)</button>
         </div>
         <div class="worker">
-            Miner: <span id="minerCount">0</span>
+            <span>Miner: <span id="minerCount">0</span></span>
             <button onclick="hire('miner')">Hire (20 Wood, 20 Stone)</button>
         </div>
     </div>
@@ -144,45 +148,15 @@
         }
 
         function hire(worker) {
-            const canAfford = Object.keys(workerCosts[worker]).every(res => resources[res] >= workerCosts[worker][res]);
-
+            const canAfford = Object.keys(workerCosts[worker]).every(resource => resources[resource] >= workerCosts[worker][resource]);
             if (canAfford) {
-                Object.keys(workerCosts[worker]).forEach(res => {
-                    resources[res] -= workerCosts[worker][res];
-                    document.getElementById(res).textContent = formatNumber(resources[res]);
-                });
-
                 workers[worker]++;
+                Object.keys(workerCosts[worker]).forEach(resource => {
+                    resources[resource] -= workerCosts[worker][resource];
+                    document.getElementById(resource).textContent = formatNumber(resources[resource]);
+                });
                 document.getElementById(worker + "Count").textContent = workers[worker];
             }
-        }
-
-        setInterval(() => {
-            resources['wood'] += workers['viking'];
-            resources['stone'] += workers['stonemason'];
-            resources['gold'] += workers['miner'];
-            
-            Object.keys(resources).forEach(resource => {
-                document.getElementById(resource).textContent = formatNumber(resources[resource]);
-            });
-
-            localStorage.setItem('vikingClicker', JSON.stringify({ resources, workers }));
-        }, 1000);
-
-        const savedData = localStorage.getItem('vikingClicker');
-
-        if (savedData) {
-            const parsedData = JSON.parse(savedData);
-            Object.assign(resources, parsedData.resources);
-            Object.assign(workers, parsedData.workers);
-            
-            Object.keys(resources).forEach(resource => {
-                document.getElementById(resource).textContent = formatNumber(resources[resource]);
-            });
-            
-            Object.keys(workers).forEach(worker => {
-                document.getElementById(worker + "Count").textContent = workers[worker];
-            });
         }
     </script>
 </body>
