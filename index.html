@@ -4,7 +4,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
     <style>
         @font-face {
             font-family: 'Norse';
@@ -150,11 +149,11 @@
         };
 
         function formatNumber(num) {
-            if (num < 1e3) return num;
+            if (num < 1e3) return num; 
             if (num >= 1e3 && num < 1e6) return +(num / 1e3).toFixed(1) + "K";
             if (num >= 1e6 && num < 1e9) return +(num / 1e6).toFixed(1) + "M";
             if (num >= 1e9 && num < 1e12) return +(num / 1e9).toFixed(1) + "B";
-            if (num >= 1e12) return +(num / 1e12).toFixed(1) + "T";
+            if (num >= 1e12) return +(num / 1e12).toFixed(1) + "T"; 
             return num;
         }
 
@@ -194,7 +193,7 @@
             resources['wood'] += workers['viking'];
             resources['stone'] += workers['stonemason'];
             resources['gold'] += workers['miner'];
-
+            
             Object.keys(resources).forEach(resource => {
                 document.getElementById(resource).textContent = formatNumber(resources[resource]);
             });
@@ -208,11 +207,11 @@
             const parsedData = JSON.parse(savedData);
             Object.assign(resources, parsedData.resources);
             Object.assign(workers, parsedData.workers);
-
+            
             Object.keys(resources).forEach(resource => {
                 document.getElementById(resource).textContent = formatNumber(resources[resource]);
             });
-
+            
             Object.keys(workers).forEach(worker => {
                 document.getElementById(worker + "Count").textContent = workers[worker];
             });
